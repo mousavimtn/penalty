@@ -3,233 +3,223 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>پنالتی رئال</title>
+<title>پنالتی حرفه‌ای</title>
 <style>
   :root {
-    --pitch-dark: #1b4d24;
-    --pitch-light: #266b32;
-    --gold: #d4af37;
-    --white: #ffffff;
-    --dark: #0b132b;
+    --grass1: #2d7a36;
+    --grass2: #24642b;
+    --line: rgba(255, 255, 255, 0.4);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
 
   body {
     height: 100vh;
-    background: var(--dark);
+    background: #000;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    perspective: 1200px; /* ایجاد عمق سه بعدی برای کل صفحه */
   }
 
-  /* بخش امتیازات */
-  .scoreboard {
-    height: 12vh;
-    background: var(--dark);
+  /* امتیازات */
+  .top-bar {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    color: var(--white);
-    border-bottom: 2px solid var(--gold);
-    z-index: 10;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2rem;
+    z-index: 100;
+    border-bottom: 2px solid #d4af37;
   }
-
-  .score-item { display: flex; flex-direction: column; align-items: center; font-weight: bold; }
-  .score-item span { font-size: 0.8rem; color: var(--gold); margin-bottom: 5px; }
-  .score-item strong { font-size: 1.5rem; }
-
-  .message { font-size: 1.2rem; color: var(--gold); font-weight: 800; text-align: center; min-height: 2rem; }
+  
+  .score-box { color: #d4af37; }
 
   /* زمین بازی */
   .pitch {
     flex: 1;
-    background: repeating-linear-gradient(0deg, var(--pitch-dark), var(--pitch-dark) 40px, var(--pitch-light) 40px, var(--pitch-light) 80px);
     position: relative;
+    background: repeating-linear-gradient(0deg, var(--grass1), var(--grass1) 50px, var(--grass2) 50px, var(--grass2) 100px);
+    /* کشیدن زمین به سمت عقب برای سه بعدی شدن */
+    transform: rotateX(15deg);
+    transform-origin: bottom center;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding-top: 20px;
-    perspective: 800px;
+    align-items: flex-end;
+    padding-bottom: 10vh;
+  }
+
+  /* نقطه پنالتی */
+  .penalty-spot {
+    position: absolute;
+    bottom: 15vh;
+    width: 20px;
+    height: 10px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 50%;
+    transform: rotateX(-15deg);
+    filter: blur(2px);
   }
 
   /* دروازه */
-  .goal {
-    width: 90%;
-    height: 35vh;
-    border: 8px solid var(--white);
-    border-bottom: none;
+  .goal-container {
+    width: 85%;
+    height: 45vh;
     position: relative;
-    background: rgba(255, 255, 255, 0.1);
-    background-image: linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
-    background-size: 20px 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    transform: rotateX(5deg);
+    border: 12px solid #eee;
+    border-bottom: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.5);
+    z-index: 10;
   }
 
-  /* سایه کورتوا */
-  .keeper-shadow {
+  /* تور دروازه (سه لایه برای عمق دادن) */
+  .net {
     position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 20px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    z-index: 1;
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    filter: blur(4px);
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.3) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(255,255,255,0.3) 2px, transparent 2px);
+    background-size: 30px 30px;
+    background-position: center;
+    z-index: 5;
+    transition: transform 0.2s;
   }
 
-  /* عکس کورتوا */
-  .keeper-img {
+  .net.shake {
+    animation: netShake 0.5s ease-in-out;
+  }
+
+  @keyframes netShake {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02) translateZ(20px); filter: brightness(1.5); }
+    100% { transform: scale(1); }
+  }
+
+  /* کورتوا */
+  .keeper {
     position: absolute;
     bottom: 0;
     left: 50%;
-    height: 140px;
+    height: 150px;
     width: auto;
-    transform: translateX(-50%);
-    transform-origin: bottom center; /* چرخش از روی پاها */
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    z-index: 2;
-    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.6));
-    animation: idle 2.5s infinite ease-in-out;
+    transform: translateX(-50%) translateZ(50px); /* جلوتر از تور */
+    transform-origin: bottom center;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 8;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8));
   }
 
-  /* انیمیشن نفس کشیدن و آماده باش */
-  @keyframes idle {
-    0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-    50% { transform: translateX(-50%) translateY(-5px) scale(1.02); }
+  /* حالت آماده باش */
+  .keeper-idle {
+    animation: idleBounce 2s infinite ease-in-out;
+  }
+  @keyframes idleBounce {
+    0%, 100% { transform: translateX(-50%) translateZ(50px) scale(1); }
+    50% { transform: translateX(-50%) translateZ(50px) scale(1.02) translateY(-5px); }
   }
 
-  /* ================== کلاس‌های شیرجه (انیمیشن‌های پرواز) ================== */
-  
-  /* شیرجه به بالا چپ */
-  .dive-tl { animation: none; transform: translate(-110px, -70px) rotate(-45deg) scale(0.95); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+  /* شیرجه های سه بعدی (چرخش در محورهای مختلف) */
+  /* بالا چپ */
+  .dive-tl { transform: translateX(-120px) translateY(-60px) translateZ(20px) rotateY(40deg) rotateZ(-30deg) scale(0.9); }
   /* بالا وسط */
-  .dive-tc { animation: none; transform: translate(-50%, -90px) scale(1.05); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+  .dive-tc { transform: translateX(-50%) translateY(-80px) translateZ(80px) rotateX(-20deg) scale(1.1); }
   /* بالا راست */
-  .dive-tr { animation: none; transform: translate(10px, -70px) rotate(45deg) scale(0.95); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+  .dive-tr { transform: translateX(20px) translateY(-60px) translateZ(20px) rotateY(-40deg) rotateZ(30deg) scale(0.9); }
   
-  /* وسط چپ (خوابیدن روی زمین) */
-  .dive-ml { animation: none; transform: translate(-130px, -10px) rotate(-80deg) scale(0.9); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
-  /* وسط وسط (ایستاده با دست باز) */
-  .dive-mc { animation: none; transform: translateX(-50%) scale(1.1); }
+  /* وسط چپ */
+  .dive-ml { transform: translateX(-140px) translateZ(-20px) rotateY(60deg) rotateZ(-50deg) scale(0.8); }
+  /* وسط وسط */
+  .dive-mc { transform: translateX(-50%) translateY(-10px) translateZ(60px) scale(1.1); }
   /* وسط راست */
-  .dive-mr { animation: none; transform: translate(30px, -10px) rotate(80deg) scale(0.9); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
+  .dive-mr { transform: translateX(40px) translateZ(-20px) rotateY(-60deg) rotateZ(50deg) scale(0.8); }
 
-  /* پایین چپ (شیرجه به پایین) */
-  .dive-bl { animation: none; transform: translate(-100px, 20px) rotate(-100deg) scale(0.85); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
-  /* پایین وسط (نشستن) */
-  .dive-bc { animation: none; transform: translateX(-50%) translateY(20px) scaleY(0.7) scaleX(1.1); filter: blur(0.5px); }
+  /* پایین چپ */
+  .dive-bl { transform: translateX(-100px) translateY(30px) translateZ(10px) rotateY(30deg) rotateZ(-70deg) scale(0.85); }
+  /* پایین وسط */
+  .dive-bc { transform: translateX(-50%) translateY(30px) translateZ(30px) scaleY(0.7) scaleX(1.1); }
   /* پایین راست */
-  .dive-br { animation: none; transform: translate(0px, 20px) rotate(100deg) scale(0.85); filter: blur(0.5px) drop-shadow(0 5px 10px rgba(0,0,0,0.6)); }
-
-  /* افکت سایه همزمان با شیرجه */
-  .shadow-dive { transform: translateX(-50%) scaleX(1.5) scaleY(0.5); opacity: 0.3; }
+  .dive-br { transform: translateX(0px) translateY(30px) translateZ(10px) rotateY(-30deg) rotateZ(70deg) scale(0.85); }
 
   /* توپ */
   .ball {
     position: absolute;
-    bottom: 5vh;
+    bottom: 15vh;
     left: 50%;
-    transform: translateX(-50%);
-    font-size: 3.5rem;
-    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    z-index: 3;
-    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+    transform: translateX(-50%) translateZ(100px); /* توپ از همه جلوتره */
+    font-size: 3rem;
+    z-index: 20;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
+    transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); /* مسیر پرواز */
   }
 
-  /* نقاط هدف */
+  /* نقاط کلیک (نواحی دروازه) */
   .targets {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    z-index: 4;
+    z-index: 30;
   }
 
-  .target { cursor: pointer; transition: background 0.2s; }
-  .target:active { background: rgba(212, 175, 55, 0.3); }
+  .target { cursor: pointer; }
+  .target:active { background: rgba(212, 175, 55, 0.2); }
 
-  /* افکت‌های متنی (گل/سیو) */
-  .result-text {
+  /* افکت متن */
+  .result {
     position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    font-size: 3rem;
+    top: 40%; left: 50%;
+    transform: translate(-50%, -50%) scale(0) rotateX(-15deg);
+    font-size: 3.5rem;
     font-weight: 900;
-    color: var(--gold);
-    text-shadow: 0 0 20px #000;
-    z-index: 10;
-    pointer-events: none;
+    color: #d4af37;
+    text-shadow: 0 5px 20px #000;
+    z-index: 40;
     opacity: 0;
+    pointer-events: none;
     transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
-
-  .result-text.show {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-
+  .result.show { transform: translate(-50%, -50%) scale(1) rotateX(-15deg); opacity: 1; }
 </style>
 </head>
 <body>
 
-  <div class="scoreboard">
-    <div class="score-item">
-      <span>ضربه</span>
-      <strong id="shotCount">0 / 5</strong>
-    </div>
-    <div class="message" id="message">به سمت دروازه ضربه بزن!</div>
-    <div class="score-item">
-      <span>گل‌ها</span>
-      <strong id="scoreCount">0</strong>
-    </div>
+  <div class="top-bar">
+    <div>ضربه: <span class="score-box" id="shotCount">0/5</span></div>
+    <div>گل: <span class="score-box" id="goalCount">0</span></div>
   </div>
 
   <div class="pitch">
-    <div class="goal">
+    <div class="penalty-spot"></div>
+    
+    <div class="goal-container" id="goal">
+      <div class="net" id="net"></div>
       
-      <!-- سایه کورتوا -->
-      <div class="keeper-shadow" id="keeperShadow"></div>
+      <img src="courtois.webp" alt="Courtois" class="keeper keeper-idle" id="keeper" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg'; this.style.width='60px'; this.style.height='80px'">
       
-      <!-- عکس کورتوا (پسوند webp) -->
-      <img src="courtois.webp" alt="Courtois" class="keeper-img" id="keeper" onerror="this.src='https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg'; this.style.width='60px'; this.style.height='80px'">
-      
-      <div class="targets">
-        <div class="target" data-dir="tl"></div>
-        <div class="target" data-dir="tc"></div>
-        <div class="target" data-dir="tr"></div>
-        <div class="target" data-dir="ml"></div>
-        <div class="target" data-dir="mc"></div>
-        <div class="target" data-dir="mr"></div>
-        <div class="target" data-dir="bl"></div>
-        <div class="target" data-dir="bc"></div>
-        <div class="target" data-dir="br"></div>
+      <div class="targets" id="targets">
+        <div class="target" data-dir="tl"></div><div class="target" data-dir="tc"></div><div class="target" data-dir="tr"></div>
+        <div class="target" data-dir="ml"></div><div class="target" data-dir="mc"></div><div class="target" data-dir="mr"></div>
+        <div class="target" data-dir="bl"></div><div class="target" data-dir="bc"></div><div class="target" data-dir="br"></div>
       </div>
     </div>
 
     <div class="ball" id="ball">⚽</div>
-    <div class="result-text" id="resultText"></div>
+    <div class="result" id="resultText"></div>
   </div>
 
 <script>
   const shotCountEl = document.getElementById('shotCount');
-  const scoreCountEl = document.getElementById('scoreCount');
-  const messageEl = document.getElementById('message');
+  const goalCountEl = document.getElementById('goalCount');
   const keeperEl = document.getElementById('keeper');
-  const keeperShadow = document.getElementById('keeperShadow');
   const ballEl = document.getElementById('ball');
+  const netEl = document.getElementById('net');
   const resultTextEl = document.getElementById('resultText');
   const targets = document.querySelectorAll('.target');
 
-  let shots = 0;
-  let goals = 0;
-  let isAnimating = false;
+  let shots = 0, goals = 0, isAnimating = false;
   const maxShots = 5;
 
   let audioCtx;
@@ -242,26 +232,37 @@
     const now = audioCtx.currentTime;
 
     if (type === 'kick') {
-      osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now);
+      osc.type = 'square'; osc.frequency.setValueAtTime(100, now);
       gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
       osc.start(now); osc.stop(now + 0.1);
     } else if (type === 'goal') {
-      osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(800, now + 0.2);
-      gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
-      osc.start(now); osc.stop(now + 0.4);
+      osc.type = 'sine'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(900, now + 0.3);
+      gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+      osc.start(now); osc.stop(now + 0.5);
     } else if (type === 'save') {
-      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now);
-      gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(200, now);
+      gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
       osc.start(now); osc.stop(now + 0.2);
     }
   }
 
-  const keeperDives = ['dive-tl', 'dive-tc', 'dive-tr', 'dive-ml', 'dive-mc', 'dive-mr', 'dive-bl', 'dive-bc', 'dive-br'];
+  const keeperDives = {
+    'tl': 'dive-tl', 'tc': 'dive-tc', 'tr': 'dive-tr',
+    'ml': 'dive-ml', 'mc': 'dive-mc', 'mr': 'dive-mr',
+    'bl': 'dive-bl', 'bc': 'dive-bc', 'br': 'dive-br'
+  };
 
+  // مسیرهای توپ نسبت به دروازه (حالا توپ واقعاً داخل دروازه میره)
   const ballPaths = {
-    'tl': 'translate(-120px, -35vh)', 'tc': 'translate(0px, -35vh)', 'tr': 'translate(120px, -35vh)',
-    'ml': 'translate(-120px, -25vh)', 'mc': 'translate(0px, -25vh)', 'mr': 'translate(120px, -25vh)',
-    'bl': 'translate(-120px, -15vh)', 'bc': 'translate(0px, -15vh)', 'br': 'translate(120px, -15vh)'
+    'tl': 'translate(-35vw, -30vh) scale(0.4)',
+    'tc': 'translate(-50%, -30vh) scale(0.4)',
+    'tr': 'translate(-65vw, -30vh) scale(0.4)',
+    'ml': 'translate(-35vw, -15vh) scale(0.5)',
+    'mc': 'translate(-50%, -15vh) scale(0.5)',
+    'mr': 'translate(-65vw, -15vh) scale(0.5)',
+    'bl': 'translate(-35vw, -2vh) scale(0.6)',
+    'bc': 'translate(-50%, -2vh) scale(0.6)',
+    'br': 'translate(-65vw, -2vh) scale(0.6)'
   };
 
   targets.forEach(target => {
@@ -270,46 +271,48 @@
       
       isAnimating = true;
       shots++;
-      shotCountEl.innerText = `${shots} / ${maxShots}`;
+      shotCountEl.innerText = `${shots}/${maxShots}`;
       const playerDir = e.target.dataset.dir;
       
-      // ضربه به توپ
+      // 1. ضربه زدن به توپ
       playSound('kick');
-      ballEl.style.transform = ballPaths[playerDir] + ' scale(0.4)';
-      ballEl.style.opacity = '0';
-
-      // شیرجه کورتوا
-      const keeperDir = keeperDives[Math.floor(Math.random() * keeperDives.length)];
+      ballEl.style.transform = `translateX(-50%) ${ballPaths[playerDir]}`;
       
-      keeperEl.className = 'keeper-img'; 
-      void keeperEl.offsetWidth; // ریست انیمیشن
-      keeperEl.classList.add(keeperDir);
+      // 2. کورتوا شیرجه میزنه
+      const keeperDir = Object.keys(keeperDives)[Math.floor(Math.random() * 9)];
       
-      // افکت سایه
-      keeperShadow.classList.add('shadow-dive');
+      // ریست انیمیشن و اعمال شیرجه
+      keeperEl.className = 'keeper'; 
+      void keeperEl.offsetWidth; 
+      keeperEl.classList.add(keeperDives[keeperDir]);
 
+      // 3. بررسی نتیجه بعد از پرواز توپ (600 میلی ثانیه)
       setTimeout(() => {
-        if (keeperDir === 'dive-' + playerDir) {
+        if (keeperDir === playerDir) {
+          // سیو شده - توپ برمیگرده بیرون
           playSound('save');
-          showResult('سیو کورتوا!', '#ff4d4d');
+          showResult('سیو شد!', '#ff4d4d');
+          ballEl.style.transform = `translateX(-50%) translateZ(150px) translateY(20vh) scale(1.2) rotate(360deg)`;
         } else {
+          // گل شده - توپ توی تور میمونه و تور تکون میخوره
           playSound('goal');
           goals++;
-          scoreCountEl.innerText = goals;
+          goalCountEl.innerText = goals;
           showResult('گـــل!', '#d4af37');
+          netEl.classList.add('shake');
         }
         
+        // 4. ریست برای ضربه بعدی
         setTimeout(() => {
           resetPositions();
           if (shots >= maxShots) {
             endGame();
           } else {
             isAnimating = false;
-            messageEl.innerText = 'ضربه بعدی!';
           }
-        }, 1200);
+        }, 1500); // زمان استراحت بین ضربه‌ها
 
-      }, 500);
+      }, 600); // زمان رسیدن توپ به دروازه
     });
   });
 
@@ -317,34 +320,18 @@
     resultTextEl.innerText = text;
     resultTextEl.style.color = color;
     resultTextEl.classList.add('show');
-    messageEl.innerText = '';
   }
 
   function resetPositions() {
     resultTextEl.classList.remove('show');
-    ballEl.style.transform = 'translateX(-50%) scale(1)';
-    ballEl.style.opacity = '1';
-    keeperEl.className = 'keeper-img';
-    keeperShadow.classList.remove('shadow-dive');
+    ballEl.style.transform = 'translateX(-50%) translateZ(100px)'; // برگشت توپ به نقطه پنالتی
+    keeperEl.className = 'keeper keeper-idle'; // کورتوا آماده میشه
+    netEl.classList.remove('shake');
   }
 
   function endGame() {
-    let finalMsg = "";
-    if (goals === 5) finalMsg = "فوق‌العاده! کورتوا رو مات کردی! 🏆";
-    else if (goals >= 3) finalMsg = "بازی خوبی بود! ⚽";
-    else finalMsg = "کورتوا برنده شد! 🧤";
-
-    messageEl.innerHTML = `<span style="font-size:1rem">${finalMsg}</span><br><span style="font-size:0.8rem; color:#fff; cursor:pointer; text-decoration:underline" onclick="restartGame()">دوباره بازی کن</span>`;
-  }
-
-  function restartGame() {
-    shots = 0;
-    goals = 0;
-    isAnimating = false;
-    shotCountEl.innerText = `0 / ${maxShots}`;
-    scoreCountEl.innerText = '0';
-    messageEl.innerText = 'به سمت دروازه ضربه بزن!';
-    resetPositions();
+    let finalMsg = goals === 5 ? "تو یه اسطوره‌ای! 🏆" : (goals >= 3 ? "بازی خوبی بود! ⚽" : "کورتوا دیوار بود! 🧱");
+    document.querySelector('.top-bar').innerHTML = `<div style="width:100%; text-align:center; color:#d4af37; font-size:1.2rem; cursor:pointer" onclick="location.reload()">${finalMsg} (لمس کن برای بازی مجدد)</div>`;
   }
 </script>
 
